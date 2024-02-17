@@ -20,10 +20,20 @@
   "files": [
     "dist/**/*"
   ],
+  "watch": {
+    "dev": {
+      "patterns": [
+        "src/**/*"
+      ],
+      "extensions": "html,css",
+      "clearBuffer": true
+    }
+  },
   "scripts": {
     "build": "node ./generate-form-html && microbundle --define process.env.NODE_ENV=production",
     "dev": "node ./generate-form-html && microbundle watch --define process.env.NODE_ENV=production",
-    "prepare": "husky install && node ./generate-form-html && git add src/form-html.ts && microbundle --define process.env.NODE_ENV=production"
+    "prepare": "husky install && node ./generate-form-html && git add src/form-html.ts && microbundle --define process.env.NODE_ENV=production",
+    "watch": "npm-watch"
   },
   "devDependencies": {
     "@floating-ui/dom": "^0.4.2",
@@ -32,6 +42,7 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.3.7",
     "microbundle": "^0.14.2",
+    "npm-watch": "^0.11.0",
     "prettier": "^2.6.1"
   },
   "lint-staged": {
