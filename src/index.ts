@@ -39,7 +39,7 @@ const optionalBackdrop = document.createElement("div");
 optionalBackdrop.id = "feedbackfin__backdrop";
 
 const trap = createFocusTrap(containerElement, {
-  initialFocus: "#feedbackfin__message",
+  initialFocus: "#feedbackfin__input_field",
   allowOutsideClick: true,
 });
 
