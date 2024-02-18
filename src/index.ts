@@ -8,11 +8,13 @@ export type FeedbackFinConfig = {
   url: string;
   user: Record<any, any>;
   disableErrorAlert: boolean;
+  closeOnClickOutside: boolean;
 };
 const config: FeedbackFinConfig = {
   url: "",
   user: {},
   disableErrorAlert: false,
+  closeOnClickOutside: false,
   // Spread user config when loaded
   ...(window as any).feedbackfin?.config,
 };
@@ -24,21 +26,28 @@ function init() {
 
   document.head.insertBefore(styleElement, document.head.firstChild);
 
-  document.querySelectorAll("[data-feedbackfin-button]").forEach((el) => {
-    el.addEventListener("click", open);
-  });
+  document
+    .querySelector("[data-feedbackfin-button]")
+    ?.addEventListener("click", open);
 }
 window.addEventListener("load", init);
 
 const containerElement = document.createElement("div");
 containerElement.id = "feedbackfin__container";
 
+const optionalBackdrop = document.createElement("div");
+optionalBackdrop.id = "feedbackfin__backdrop";
+
 const trap = createFocusTrap(containerElement, {
-  initialFocus: "#feedbackfin__radio--issue",
+  initialFocus: "#feedbackfin__message",
   allowOutsideClick: true,
 });
 
 function open(e: Event) {
+  if (config.closeOnClickOutside) {
+    document.body.appendChild(optionalBackdrop);
+  }
+
   document.body.appendChild(containerElement);
   containerElement.innerHTML = formHTML;
   containerElement.style.display = "block";
@@ -57,15 +66,11 @@ function open(e: Event) {
 
   trap.activate();
 
-  document
-    .getElementById("feedbackfin__close")!
-    .addEventListener("click", close);
-
-  Array.from(
-    containerElement.getElementsByClassName("feedbackfin__radio")
-  ).forEach((el) => {
-    el.addEventListener("change", changeType);
-  });
+  if (config.closeOnClickOutside) {
+    document
+      .getElementById("feedbackfin__backdrop")
+      ?.addEventListener("click", close);
+  }
 
   document
     .getElementById("feedbackfin__form")!
@@ -78,22 +83,8 @@ function close() {
   containerElement.innerHTML = "";
 
   containerElement.remove();
-  containerElement.removeAttribute("data-feedback-type");
+  optionalBackdrop.remove();
   containerElement.removeAttribute("data-success");
-}
-
-function changeType(e: Event) {
-  const value = (e.target as HTMLInputElement).value;
-
-  containerElement.setAttribute("data-feedback-type", value);
-
-  let placeholder = "I think…";
-  if (value === "issue") placeholder = "I’m having an issue with…";
-  else if (value === "idea") placeholder = "I’d like to see…";
-
-  document
-    .getElementById("feedbackfin__message")
-    ?.setAttribute("placeholder", placeholder);
 }
 
 function submit(e: Event) {
@@ -116,7 +107,6 @@ function submit(e: Event) {
 
   const data = {
     ...config.user,
-    feedbackType: (target.elements as any).feedbackType.value,
     message: (target.elements as any).message.value,
     timestamp: Date.now(),
   };
@@ -138,7 +128,7 @@ function submit(e: Event) {
   return false;
 }
 
-const feedbackfin = { init, open, changeType, close, submit, config };
+const feedbackfin = { init, open, close, submit, config };
 (window as any).feedbackfin = feedbackfin;
 
 export default feedbackfin;
