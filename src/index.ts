@@ -10,7 +10,7 @@ export type FeedbackFinConfig = {
   chatbotTitle: string;
   greetingMessage: string | null;
   disableErrorAlert: boolean;
-  closeOnClickOutside: boolean;
+  closeOnOutsideClick: boolean;
 };
 const config: FeedbackFinConfig = {
   url: "",
@@ -18,7 +18,7 @@ const config: FeedbackFinConfig = {
   chatbotTitle: "Chatbot",
   greetingMessage: null,
   disableErrorAlert: false,
-  closeOnClickOutside: false,
+  closeOnOutsideClick: false,
   // Spread user config when loaded
   ...(window as any).feedbackfin?.config,
 };
@@ -51,7 +51,7 @@ const trap = createFocusTrap(containerElement, {
 });
 
 function open(e: Event) {
-  if (config.closeOnClickOutside) {
+  if (config.closeOnOutsideClick) {
     document.body.appendChild(optionalBackdrop);
   }
 
@@ -85,10 +85,10 @@ function open(e: Event) {
 
   trap.activate();
 
-  if (config.closeOnClickOutside) {
+  if (config.closeOnOutsideClick) {
     document
-      .getElementById("feedbackfin__backdrop")
-      ?.addEventListener("click", close);
+      .getElementById("feedbackfin__backdrop")!
+      .addEventListener("click", close);
   }
 
   document
@@ -100,10 +100,8 @@ function close() {
   trap.deactivate();
 
   containerElement.innerHTML = "";
-
   containerElement.remove();
   optionalBackdrop.remove();
-  containerElement.removeAttribute("data-success");
 }
 
 function createNewMessageEntry(
@@ -167,13 +165,14 @@ function submit(e: Event) {
         if (!config.disableErrorAlert)
           alert(`Could not send message: ${res.statusText}`);
       }
-      submitElement.removeAttribute("disabled");
     })
     .catch((e) => {
-      submitElement.removeAttribute("disabled");
       console.error("Feedback Fin:", e);
       if (!config.disableErrorAlert)
         alert(`Could not send message: ${e.message}`);
+    })
+    .finally(() => {
+      submitElement.removeAttribute("disabled");
     });
 
   target.reset();

@@ -168,8 +168,6 @@
 
 #chatbot__title_icon {
   margin-right: 0.5rem;
-  width: 24px;
-  height: 19px;
 }
 
 #chatbot__title_icon path {
@@ -262,7 +260,6 @@
   align-self: flex-start;
 }
 #chatbot__messages_history .chatbot__message.chatbot__message--system p {
-  text-align: left;
   color: var(--feedbackfin-system-message-text-color);
 }
 #chatbot__messages_history .chatbot__message.chatbot__message--user {
@@ -270,8 +267,12 @@
   align-self: flex-end;
 }
 #chatbot__messages_history .chatbot__message.chatbot__message--user p {
-  text-align: right;
   color: var(--feedbackfin-user-message-text-color);
+}
+#chatbot__messages_history
+  .chatbot__message.chatbot__message--user
+  p:nth-child(2) {
+  text-align: right;
 }
 
 #feedbackfin__form {
