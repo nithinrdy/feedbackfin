@@ -7,14 +7,16 @@ import formCSS from "./form.css";
 export type FeedbackFinConfig = {
   url: string;
   user: Record<any, any>;
-  greetingMessage: string;
+  chatbotTitle: string;
+  greetingMessage: string | null;
   disableErrorAlert: boolean;
   closeOnClickOutside: boolean;
 };
 const config: FeedbackFinConfig = {
   url: "",
   user: {},
-  greetingMessage: "Hello there!",
+  chatbotTitle: "Chatbot",
+  greetingMessage: null,
   disableErrorAlert: false,
   closeOnClickOutside: false,
   // Spread user config when loaded
@@ -56,6 +58,12 @@ function open(e: Event) {
   document.body.appendChild(containerElement);
   containerElement.innerHTML = formHTML;
   containerElement.style.display = "block";
+
+  const chatbotHeaderTitleText = document.createElement("span");
+  chatbotHeaderTitleText.id = "chatbot__title_text";
+  chatbotHeaderTitleText.textContent = config.chatbotTitle;
+  const chatbotHeaderTitle = document.getElementById("chatbot__title")!;
+  chatbotHeaderTitle.appendChild(chatbotHeaderTitleText);
 
   const chatbotBody = document.getElementById("chatbot__body")!;
   chatbotBody.prepend(messagesHistory);

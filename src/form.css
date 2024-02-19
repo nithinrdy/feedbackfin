@@ -163,14 +163,24 @@
   display: flex;
   align-items: center;
   font-weight: var(--feedbackfin-title-weight);
+  width: 60%;
 }
 
-#chatbot__icon {
+#chatbot__title_icon {
   margin-right: 0.5rem;
+  width: 24px;
+  height: 19px;
 }
 
-#chatbot__icon path {
+#chatbot__title_icon path {
   fill: var(--feedbackfin-primary-color-text);
+}
+
+#chatbot__title_text {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 #chatbot__branding {
@@ -233,7 +243,7 @@
 
 #chatbot__messages_history .chatbot__message {
   border-radius: 1rem;
-  max-width: 70%;
+  max-width: 85%;
   margin-bottom: 0.5rem;
   padding: 1rem;
 }
