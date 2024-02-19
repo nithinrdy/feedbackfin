@@ -7,12 +7,14 @@ import formCSS from "./form.css";
 export type FeedbackFinConfig = {
   url: string;
   user: Record<any, any>;
+  greetingMessage: string;
   disableErrorAlert: boolean;
   closeOnClickOutside: boolean;
 };
 const config: FeedbackFinConfig = {
   url: "",
   user: {},
+  greetingMessage: "Hello there!",
   disableErrorAlert: false,
   closeOnClickOutside: false,
   // Spread user config when loaded
@@ -35,6 +37,9 @@ window.addEventListener("load", init);
 const containerElement = document.createElement("div");
 containerElement.id = "feedbackfin__container";
 
+const messagesHistory = document.createElement("div");
+messagesHistory.id = "chatbot__messages_history";
+
 const optionalBackdrop = document.createElement("div");
 optionalBackdrop.id = "feedbackfin__backdrop";
 
@@ -51,6 +56,12 @@ function open(e: Event) {
   document.body.appendChild(containerElement);
   containerElement.innerHTML = formHTML;
   containerElement.style.display = "block";
+
+  const chatbotBody = document.getElementById("chatbot__body")!;
+  chatbotBody.prepend(messagesHistory);
+  if (config.greetingMessage && messagesHistory.children.length === 0) {
+    createNewMessageEntry(config.greetingMessage, Date.now(), "system");
+  }
 
   const target = (e?.target as HTMLElement) || document.body;
   computePosition(target, containerElement, {
@@ -87,6 +98,29 @@ function close() {
   containerElement.removeAttribute("data-success");
 }
 
+function createNewMessageEntry(
+  message: string,
+  timestamp: number,
+  from: "system" | "user"
+) {
+  const messageElement = document.createElement("div");
+  messageElement.classList.add("chatbot__message");
+  messageElement.classList.add(`chatbot__message--${from}`);
+
+  const messageText = document.createElement("p");
+  messageText.textContent = message;
+  messageElement.appendChild(messageText);
+
+  const messageTimestamp = document.createElement("p");
+  messageTimestamp.textContent =
+    ("0" + new Date(timestamp).getHours()).slice(-2) + // Hours (padded with 0 if needed)
+    ":" +
+    ("0" + new Date(timestamp).getMinutes()).slice(-2); // Minutes (padded with 0 if needed)
+  messageElement.appendChild(messageTimestamp);
+
+  messagesHistory.prepend(messageElement);
+}
+
 function submit(e: Event) {
   e.preventDefault();
   const target = e.target as HTMLFormElement;
@@ -100,7 +134,6 @@ function submit(e: Event) {
 
   const submitElement = document.getElementById("feedbackfin__submit")!;
   submitElement.setAttribute("disabled", "");
-  submitElement.innerHTML = "Sending…";
 
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
@@ -111,20 +144,31 @@ function submit(e: Event) {
     timestamp: Date.now(),
   };
 
+  createNewMessageEntry(data.message, data.timestamp, "user");
+
   fetch(config.url, {
     method: "POST",
     headers: myHeaders,
     body: JSON.stringify(data),
   })
-    .then(() => {
-      containerElement.setAttribute("data-success", "");
+    .then(async (res) => {
+      if (res.ok) {
+        createNewMessageEntry(await res.text(), Date.now(), "system");
+      } else {
+        console.error("Feedback Fin: Server error", res);
+        if (!config.disableErrorAlert)
+          alert(`Could not send message: ${res.statusText}`);
+      }
+      submitElement.removeAttribute("disabled");
     })
     .catch((e) => {
+      submitElement.removeAttribute("disabled");
       console.error("Feedback Fin:", e);
       if (!config.disableErrorAlert)
-        alert(`Could not send feedback: ${e.message}`);
+        alert(`Could not send message: ${e.message}`);
     });
 
+  target.reset();
   return false;
 }
 
